@@ -30,10 +30,16 @@ func Downstream(g *graph.Graph, id string) (map[string]bool, error) {
 		return nil, errors.New("node not found")
 	}
 	res := map[string]bool{}
-	// only direct successors — misses transitive downstream
-	for _, to := range g.Successors(id) {
-		res[to] = true
+	var dfs func(string)
+	dfs = func(n string) {
+		for _, to := range g.Successors(n) {
+			if !res[to] {
+				res[to] = true
+				dfs(to)
+			}
+		}
 	}
+	dfs(id)
 	delete(res, id)
 	return res, nil
 }
